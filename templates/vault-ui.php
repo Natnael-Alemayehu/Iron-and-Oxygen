@@ -139,11 +139,152 @@ $category_labels = [
                     <span><?php esc_html_e('Copy', 'io-vault'); ?></span>
                 </button>
             </div>
-            <table>
-
-
+            <table class="io-pct-table" id="ioPctTable">
+                <thead>
+                    <tr>
+                        <th scope="col"><?php esc_html_e('%', 'io-vault'); ?></th>
+                        <th scope="col" id="ioTableWeightHeader"><?php esc_html_e('Weight', 'io-vault'); ?></th>
+                        <th scope="col"><?php esc_html_e('Target Zone', 'io-vault'); ?></th>
+                    </tr>
+                </thead>
+                <tbody id="ioPctTableBody"></tbody>
             </table>
         </div>
     </section>
-</div>
+    <?php endif; ?>
+    <!-- Panel 2 - Benchmark Vault -->
+    <?php if($show_vault) : ?>
+    <section
+        class="io-panel io-panel--vault<?php echo ! $show_tabs ? ' io-panel--active' : ''; ?>"
+        id="tab-panel-vault"
+        role="tabpanel"
+        aria-labelledby="tab-btn-vault"
+    >
+        <header class="io-section-header">
+            <h2 class="io-section-title">
+                <span class="io-icon-badge">LOCK</span>
+                <?php esc_html_e('Benchmark Vault', 'io-vault'); ?>
+            </h2>
+            <p class="io-section-sub"><?php esc_html_e('Standard wordouts &amp; goal scores.', 'io-vault'); ?></p>
+        </header>
+
+        <?php if( ! empty( $benchmarks ) ) : ?>
+
+        <!-- Search + Filter -->
+        <div class="io-search-bar">
+            <div class="io-search-wrap">
+                <svg class="io-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"></svg>
+                <input 
+                    class="io-input io-input--search"
+                    id="ioSearch"
+                    type="search"
+                    placeholder="<?php esc_attr_e('Search benchmark...', 'io-vault'); ?>"
+                    aria-label="<?php esc_attr_e('Search benchmarks', 'io-vault'); ?>"
+                >
+            </div>
+            <select class="io-select io-select--filter" id="ioCategoryFilter" aria-label="<?php esc_attr_e('Filter by category', 'io-vault'); ?>">
+                <option value="<?php echo esc_attr( $val ); ?>"><?php echo esc_html( $label ); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+
+        <div class="io-benchmark-count" id="ioBenchmarkCount" aria-live="polite">
+            <?php
+            printf(
+                /* translators: %d = number of benchmarks */
+                esc_html(_n('%d Benchmark', '%d Benchmarks', count($benchmarks), 'io-vault') ),
+                count( $benchmarks )
+            );
+            ?>
+        </div>
+
+        <!-- Benchmark cards -->
+        <ul class="io-benchmark-list" id="ioBenchmarkList" role="list">
+            <?php foreach ($benchmarks as $bm) :
+                $cat_slug   = esc_attr($bm['category']);
+                $cat_label  = $category_labels[ $bm['category'] ] ?? '';
+                $equip      = $bm['equipment'] ? array_map('trim', explode(',', $bm['equipment'])) : [];    
+            ?>
+            <li
+                class="io-benchmark-card"
+                data-title="<?php echo esc_attr(strtolower($bm['title'])) ?>"
+                data-category="<?php echo $cat_slug; ?>"
+                data-search="<?php echo esc_attr(strtolower($bm['title'] . ' ' . $bm['desc'] . ' ' . $bm['equipment'])); ?>"
+            >
+                <button
+                    class="io-card-trigger"
+                    aria-expanded="false"
+                    aria-contrils="bm-body-<?php echo esc_attr($bm['id']); ?>"
+                >
+                    <span class="io-card-title"><?php echo esc_html($bm['title']); ?></span>
+                    <span class="io-card-meta">
+                        <?php if( $cat_label ) : ?>
+                            <span class="io-badge io-badge--<?php echo $cat_slug ?>"><?php echo esc_html($cat_label); ?></span>
+                        <?php endif; ?>
+                        <?php if( $bm['goal'] ): ?>
+                            <span class="io-goal-pill">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14" /></svg>
+                                <?php echo esc_html( $bm['goal'] ); ?>
+                            </span>
+                        <?php endif ?>
+                    </span>
+                    <span class="io-cheveron" aria-hidden="true">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </span>
+                </button>
+
+                <div
+                    class="io-card-body"
+                    id="bm-body-<?php echo esc_attr( $bm['id'] ); ?>"
+                    hidden
+                >
+                    <?php if ( $bm['desc'] ); ?>
+                    <div class="io-desc">
+                        <h4 class="io-sub-heading"><?php esc_html_e('Movement Descripiton', 'io-vault'); ?></h4>
+                        <p><?php echo n12br( esc_html( $bm['desc'] ) ); ?></p>
+                    </div>
+                    <?php endif; ?>
+
+                    <?php if( ! empty( $bm['content'] ) ): ?>
+                        <div class="io-wp-content">
+                            <?php echo wp_kses_post( $bm['content'] ); ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if ( ! empty( $equip ) ) : ?>
+                        <div class="io-setup">
+                            <h4 class="io-sub-heading"><?php esc_html_e('Equipment', 'io-vault'); ?></h4>
+                            <ul class="io-equip-list">
+                                <?php foreach ( $equip as $item ) : ?>
+                                    <li><?php echo esc_html( $item ); ?></li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if( $bm['goal'] ): ?>
+                        <div class="io-goal-block">
+                            <span class="io-goal-label"><?php esc_html_e('Goal Score', 'io-vault');?></span>
+                            <span class="io-goal-value"><?php echo esc_html( $bm['goal'] ); ?></span>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </li>
+            <?php endforeach; ?>
+        </ul>
+        
+        <p class="io-empty-msg" id="ioBenchmarkEmpty" hidden>
+            <?php esc_html_e( 'No benchmarks match your search.', 'io-vault' ); ?>
+        </p>
+
+        <?php else: ?>
+        <div class="io-empty-state">
+            <p> <?php esc_html_e('No benchmark have been published yet. Add some via the WordPress admin -> Benchmark menu.', 'io-vault'); ?> </p>
+        </div>
+        <?php endif; ?>
+        
+    </section>
+    <?php endif; ?>
+    
+</div> <!-- /.io-vault-root -->
 <?php

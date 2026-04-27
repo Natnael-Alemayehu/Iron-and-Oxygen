@@ -24,3 +24,28 @@ A mobile-first, industry-dark utility for your member portal: a Benchmark Workou
 ---
 
 ## Adding Benchmarks
+1. In your WordPress admin, go to **Benchmarks-> Add Benchmark** (look for the fast performance icon in the sidebar at position 25).
+2. Fill in:
+    - **Title** - Workout name (e.g. "Century Test", "The Iron Mile")
+    - **Body (Editor)** - Optional: add a full workout description with Gutenberg blocks
+    - **Goal Time/Score** (meta box) - e.g. `Sub 10:00`, `150+ reps`, `225 lb+`
+    - **Category** - Conditioning | Strength | Gymnastics | Mixed Modal
+    - **Equipment** - Comma-separated list (e.g. `Barbell, pull-up Bar, 24" Box`)
+    - **Movement Description / Rx Standards** - workout structure, rep schemas, scaling notes
+3. Set status to **publish**.
+
+The benchmark will immediately appear in the Vault (alphabetically sorted).
+
+---
+
+## Using the Calculator
+
+1. Select a lift from the dropdown, or choose **Custom...** and type your own.
+2. Enter your **1-Rep Max** weight.
+3. Toggle the unit between **lb** and **kg**.
+4. Choose a **rounding increment** (5/2.5/1/None).
+5. The table populates instantly - no page reload required.
+6. Use the **Copy** button to copy the full table to your clipboard.
+
+
+### Training Zones
