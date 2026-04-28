@@ -246,4 +246,77 @@
         });
     }
 
-})
+    // BENCHMARK VAULT  
+    function bindVault() {
+        if ( !$benchmarkCards.length ) return ;
+
+        // Accordion toggles
+        $benchmarkCards.forEach(card => {
+            const trigger   = card.querySelector('.io-card-trigger');
+            const body  = card.querySelector('.io-card-body');
+            if (!trigger || !body) return;
+
+            trigger.addEventListener( 'click', () => {
+                const expanded  = trigger.getAttribute('aria-expanded') === 'true';
+                trigger.setAttribute('aria-expanded', String(!expanded));
+
+                if(expanded) {
+                    body.classList.remove('is-open');
+                    // Delay hidden so animation can complete
+                    setTimeout(()=> {body.hidden = true; }, 160);
+                } else {
+                    body.hidden = false;
+                    // Force reflow then add class
+                    void body.offsetWidth;
+                    body.classList.add('is-open');
+                }
+            });
+        });
+
+        // Search + filter
+        if ($search)    $search.addEventListener('input', filterVault);
+        if ($catFilter) $catFilter.addEventListener('change', filterVault);
+    }
+
+    function filterVault() {
+        const q     = ($search      ? $search.value.toLowerCase().trim()    : '');
+        const cat   = ($catFilter   ? $catFilter.value                      : '');
+
+        let visible = 0;
+
+        $benchmarkCards.forEach(card=> {
+            const   searchHaystack  = card.dataset.search   || '';
+            const   cardCat         = card.dataset.category || '';
+
+            const   matchesSearch   = !q  ||  searchHaystack.includes(q);
+            const   matchesCat      = !cat||  cardCat  ===  cat;
+
+            if (matchesSearch && matchesCat) {
+                card.classList.remove('is-hidden');
+                visible++;
+            } else {
+                card.classList.add('is-hidden');
+            }
+        });
+
+        // Update count
+        if ($benchmarkCount) {
+            $benchmarkCount.textContent = visible === 1
+                ? '1 Benchmark'
+                : `${visible} Benchmarks`;
+        }
+
+        // Show empty message if needed
+        if ($emptyMsg) {
+            $emptyMsg.hidden = visible > 0;
+        }
+    }
+
+    // BOOT
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+
+})();

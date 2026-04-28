@@ -49,3 +49,51 @@ The benchmark will immediately appear in the Vault (alphabetically sorted).
 
 
 ### Training Zones
+|Zone|% Range|Purpose|
+|---|---|---|
+|Warm-Up|50-55%|Technique / warm-up sets|
+|Build|60-65%|Skill & volume work|
+|Work|70-80%|Primary working sets|
+|Heavy|85-90%|Strength development|
+|Max Effort|95%|Competition / testing|
+
+---
+
+## File Structure
+
+```
+iron-oxygen-vault/
+├── assets
+│   ├── css
+│   │   └── vault.css
+│   └── js
+│       └── vault.js
+├── demo.html
+├── includes
+│   ├── cpt-benchmark.php
+│   ├── enqueue.php
+│   ├── meta-boxes.php
+│   └── shortcode.php
+├── {includes,assets
+│   └── css,assets
+│       └── js,templates}
+├── iron-oxygen-vault.php
+├── README.md
+└── templates
+    └── vault-ui.php
+```
+
+---
+
+## Performance Notes
+
+- **CSS/JS only loads on pages that contain the `[io_vault]` shortcode** - zero overhead on every other page.
+- The percentage calculator is **100% client-side** - no server requests, instant results.
+- Benchmark search and filtering are also **client-side** after the initial page render.
+
+---
+
+## Requirements
+- WordPress 6.0+
+- PHP 8.0+
+- No additional plugins or page builders required.
