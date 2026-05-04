@@ -462,13 +462,174 @@
                         <span class="io-badge io-badge--conditioning">Conditioning</span>
                         <span class="io-goal-pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>150+ cals</span>
                     </span>
-                    <span 467></span>
+                    <span class="io-chevron"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
                 </button>
+                <div class="io-card-body" id="bm-body-5" hidden>
+                    <div class="io-desc"><h4 class="io-sub-heading">Movement Description</h4><p>20-Minute AMEAP: \n15 Cal Row \n12 Cal Assult Bike \n9 Burpee Box Jumps (24/20 in) \n\nScore = total calories accumulated on rower + bike across all completed rounds. Push the pace on machines; use burpees as active recovery.</p></div>
+                    <div class="io-equip">
+                        <h4 class="io-sub-heading">Equipment</h4>
+                        <ul class="io-equip-list"><li>Rowing Erg</li><li>Assault Bile</li><li>24" Box</li></ul>
+                    </div>
+                    <div class="io-goal-block"><span class="io-goal-label">Goal Score</span><span class="io-goal-value">150+ cals</span></div>
+                </div>
+            </li>
+
+            <!-- 6 -->
+            <li class="io-benchmark-card" data-title="clean complex" data-category="strength" data-search="clean complex clean jerk strength barbell">
+                <button class="io-card-trigger" aria-expanded="false" aria-controls="bm-body-6">
+                    <span class="io-card-title">Clean Complex</span>
+                    <span class="io-card-meta">
+                        <span class="io-badge io-badge--strength">Strength</span>
+                        <span class="io-goal-pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Heavy Single</span>
+                    </span>
+                    <span class="io-chevron"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+                </button>
+                <div class="io-card-body" id="bm-body-6" hidden>
+                    <div class="io-desc"><h4 class="io-sub-heading">Movement Description</h4><p>E2MOM for 20 minutes:\n1 Power Clean + 1 Hang Clean + 1 Front Squat + 1 Jerk\n\nBuild to a heavy single complex. Drop and reset between attempts if needed. Record heaviest successful complex completed with sound technique.</p></div>
+                    <div class="io-equip">
+                        <h4 class="io-sub-heading">Equipment</h4>
+                        <ul class="io-equip-list"><li>Barbell</li><li>Plates</li><li>Collars</li></ul>
+                    </div>
+                    <div class="io-goal-block"><span class="io-goal-label">Goal Score</span><span class="io-goal-value">Heavy single</span></div>
+                </div>
+            </li>
+
+            <!-- 7 -->
+            <li class="io-benchmark-card" data-title="the grind" data-category="mixed" data-search="grind thrusters pull-ups mixed modal benchmark">
+                <button class="io-card-trigger" aria-expanded="false" aria-controls="bm-body-7">
+                    <span class="io-card-title">The Grind</span>
+                    <span class="io-card-meta">
+                        <span class="io-badge io-badge--mixed">Mixed Modal</span>
+                        <span class="io-goal-pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Sub 12:00</span>
+                    </span>
+                    <span class="io-chevron"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+                </button>
+                <div class="io-card-body" id="bm-body-7" hidden>
+                    <div class="io-desc"><h4 class="io-sub-heading">Movement Description</h4><p>21-15-9 for time:\nThrusters (95/65 lb)\nPull-Ups\n\nClassic benchmark. Thrusters from the rack. Pull-ups kipping or butterfly. Scale load to allow unbroken sets on the round of 9. Compare to prior scores every 8 weeks.</p></div>
+                    <div class="io-equip">
+                        <h4 class="io-sub-heading">Equipment</h4>
+                        <ul class="io-equip-list"><li>Barbell</li><li>Pull-up Bar</li><li>Plates</li></ul>
+                    </div>
+                    <div class="io-goal-block"><span class="io-goal-label">Goal Score</span><span class="io-goal-value">Sub 12:00</span></div>
+                </div>
             </li>
         </ul>
+        <p class="io-empty-msg" id="ioBenchmarkEmpty" hidden>No benchmark match your search.</p>
     </section>
 
-</div>
+</div> 
+
+<script>
+
+(function () {
+    'use strict';
+    const PERCENTAGES = [50,55,60,65,70,75,80,85,90,95];
+    const ZONES = {
+        50: {label:'Warm-Up', cls:'warm'}, 55:{label:'Warm-Up', cls:'warm'},
+        60: {label:'Build', cls:'build'}, 65:{label:'Build', cls:'build'},
+        70: {label:'Work', cls:'work'}, 75:{label:'Work', cls:'work'}, 80:{label:'Work', cls:'work'},
+        85: {label:'Heavy', cls:'heavy'}, 90:{label:'Heavy', cls:'heavy'},
+        95: {label:'Max Effort', cls:'max'}
+    };
+    let state = {unit:'lb', round:5, oneRM:'', lift:'Back Squat'};
+    const $r = id => document.getElementById(id);
+    const $root = $r('ioVaultRoot'), $liftName=$r('ioLiftName'), $liftCustom=$r('ioLiftCustom'),
+          $oneRM=$r('io1RM'), $resultWrap=$r('ioResultWrap'), $resultTitle=$r('ioResultTitle'),
+          $tableBody=$r('ioPctTableBody'), $tableWH=$r(ioTableWeightHeader),
+          $copyBtn=$r('ioCopyBtn'), $search=$r('ioSearch'), $catFilter=$r('ioCategoryFilter'),
+          $count=$r('ioBenchmarkCount'), $emptyMsg=$r('ioBenchmarkEmpty');
+    const $tableBtns=$root.querySelectorAll('.io-tab-btn'),
+          $panels=$root.querySelectorAll('.io-panel'),
+          $unitBtns=$root.querySelectorAll('.io-round-btn'),
+          $cards=$root.querySelectorAll('.io-benchmark-card');
     
+    // Tabs
+    $tabBtns.forEach(btn => {
+        btn.addEventListener('click', ()=>{
+            const t=btn.dataset.tab;
+            $tabBtns.forEach(b=>{b.classList.remove('io-tab-btn--active');b.setAttribute('aria-selected','false');});
+            $panels.forEach(p=>p.classList.remove('io-panel--active'));
+            btn.classList.add('io-tab-btn--active');btn.setAttribute('aria-selected','true');
+            const p=document.getElementById('tab-panel-'+t);if(p)p.classList.add('io-panel--active');
+        });
+    });
+
+    // Lift select
+    $liftName.addEventListener('change', ()=>{
+        const c=$liftName.value==='Custom...';
+        $liftCustom.style.display=c?'block':'none';
+        state.lift=c?($liftCustom.value||'Custom'):$liftName.value;
+        renderTable();
+    });
+    $liftCustom.addEventListener('input',()=>{state.lift=$liftCustom.value||'Custom';renderTable();});
+
+    // 1RM
+    $oneRM.addEventListener('input', ()=>{state.oneRM=$oneRM.value;renderTable();});
+
+    // Units
+    $unitBtns.forEach(b=>b.addEventListener('click',()=>{
+        $unitBtns.forEach(x=x.classList.remove('io-unit-btn--active'));
+        b.classList.add('io-unit-btn--active');state.unit=b.dataset.unit;
+        if($tableWH)$tableWH.textContent=`weight (${state.unit})`;renderTable();
+    }));
+
+    function roundTo(v,i){return i?Math.round(v/i)*i:v;}
+
+    function renderTable() {
+        const raw=parseFloat(state.oneRM);
+        if(!raw||raw<=0) {$resultWrap.classList.remove('is-visible');return;}
+        if($resultTitle)$resultTitle.textContent=`${state.lift} - 1RM: ${raw} ${state.unit}`;
+        if($tableWH)$tableWH.textContent=`Weight (${state.unit})`;
+        let html='';
+        PERCENTAGES.forEach(pct=>{
+            const w=roundTo(raw*(pct/100), state.round);
+            const z=ZONES[pct];const hi=pct>=80;
+            html+=`<tr data-zone="${z.cls}"><td>${pct}%</td><td class="io-td-weight${hi?' io-td-weight--highlight':''}">${w}</td><td><span class="io-zone-tag io-zone-tag--${z.cls}">${z.label}</span></td></tr>`;
+        });
+        $tableBody.innerHTML=html;
+        $resultWrap.classList.add('is-visible');
+    }
+
+    // Copy
+    $copyBtn.addEventListener('click',()=>{
+        const raw=parseFloat(state.oneRM);if(!raw)return;
+        let t=`${state.lift} - 1RM: ${raw} ${state.unit}\n${'-'.repeat(30)}\n%\tWeight (${state.unit})\tZone\n`;
+        PERCENTAGES.forEach(pct=>{t+=`${pct}% \t${roundTo(raw*(pct/100),state.round)}\t${ZONES[pct].label}\n`;});
+        navigator.clipboard.writeText(t).then(()=>{
+            $copyBtn.classList.add('copied');
+            const s=$copyBtn.querySelector('span'),o=s.textContent;s.textContent='Copied!';
+            setTimeout(()=>{$copyBtn.classList.remove('copied');s.textContent=o;},1800);
+        });
+    });
+
+    // Vault accordion
+    $cards.forEach(cards=>{
+        const trigger=card.querySelector('.io-card-trigger'),body=card.querySelector('.io-card-body');
+        if(!trigger||!body) return;
+        trigger.addEventListener('click', ()=>{
+            const exp=trigger.getAttribute('aria-expanded')==='true';
+            trigger.setAttribute.getAttribute('aria-expanded', String(!exp));
+            if(exp){body.classList.remove('is-open');setTimeout(()=>{body.hidden=true;},160);}
+            else{body.hidden=false;void body.offsetWidth;body.classList.add('is-open');}
+        });
+    });
+
+    // Search + filter
+    function filterVault() {
+        const q=$search?$search.value.toLowerCase().trim():'';
+        const cat=$catFilter?$catFilter.value:'';
+        let visible=0;
+        $cards.forEach(c=>{
+            const match=(!q||c.dataset.search.includes(q)&&(!cat||c.dataset.category===cat));
+            c.classList.toggle('is-hidden',!match);if(match)visible++;
+        });
+        if($count)$count.textContent=`${visible} Benchmark${visible!==1?'s':''}`;
+        if($emptyMsg)$emptyMsg.hidden=visible>0;
+    }
+    if($search)$search.addEventListener('input',filterVault);
+    if($catFilter)$catFilter.addEventListener('change',filterVault);
+})();
+
+</script>
 </body>
 </html>
