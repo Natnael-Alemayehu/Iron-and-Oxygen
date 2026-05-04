@@ -248,10 +248,227 @@
     .io-equip-list { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; }
     .io-equip-list li { background: var(--io-surface-2); border: 1px solid var(--io-border); border-radius: var(--io-radius); padding: 4px 10px; font-size: 12px; color: var(--io-text-muted); }
     .io-goal-block { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--io-accent-dim); border: 1px solid rgba(232, 255, 58, .2); border-radius: var(--io-radius); }
-    
+    .io-goal-label { font-family: var(--io-font-display); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--io-text-dim); }
+    .io-goal-value { font-family: var(--io-font-display); font-size: 20px; font-weight: 700; color: var(--io-accent); letter-spacing: .03em; }
+    .io-empty-msg { text-align: center; padding: 40px 20px; color: var(--io-text-muted); font-size: 14px; }
+    .io-value-root ::-webkit-scrollbar {width: 6px; height: 6px;}
+    .io-value-root ::-webkit-scrollbar-track { background: transparent; }
+    .io-vault-root ::-webkit-scrollbar-thumb { background: var(--io-border); border-radius: 3px; }
+    .io-value-root :focus-visible { outline: 2px solid var(--io-accent); outline-offset: 2px; }
+    @media (max-width: 480px) {
+        .io-tab-btn span:not(.io-tab-icon) { font-size: 11px; }
+        .io-card-trigger { grid-template-columns: 1fr auto; }
+        .io-calc-meta { display: none; }
+        .io-pct-table-td, .io-pct-table th { padding: 10px; }
+        .io-pct-table td.io-td-weight { font-size: 16px; }
+    }
     </style>
 </head>
 <body>
+
+<header class="page-header">
+    <div class="page-logo">Iron <span>&</span>Oxygen</div>
+    <div class="page-sub">Member Portal - Benchmark Vault &amp; % Calculator</div>
+</header>
+
+<div class="demo-note">
+    <strong>Live Demo</strong> - This is the rendered output of the <code>[io_vault]</code> WordPress shortcode.
+    All calculator logic runs client-side with no page reloads.
+</div>
+
+<!-- Value Root -->
+<div class="io-value-root" id="ioVaultRoot">
+    <!-- Tabs -->
+     <nav class="io-tab-nav" id="tablist">
+        <button class="io-tab-btn io-tab-btn--active" role="tab" id="tab-btn-calc" aria-controls="tab-panel-calc" aria-selected="true" data-tab="calc">
+            <span class="io-tab-icon">Thunder</span><span>% Calculator</span>
+        </button>
+        <button class="io-tab-btn" role="tab" id="tab-btn-vault" aria-controls="tab-panel-vault" aria-selected="false" data-tab="vault">
+            <span class="io-tab-icon">LOCK</span><span>Benchmark Vault</span>
+        </button>
+     </nav>
+
+     <!-- CALCULATOR PANEL -->
+    <section class="io-panel io-panel--calc io-panel--active" id="tab-panel-calc" role="tabpanel" aria-labelledby="tab-btn-calc">
+        <header class="io-section-header">
+            <h2 class="io-section-title"><span class="io-icon-badge">THUNDER</span>Percentage Calculator</h2>
+            <p class="io-section-sub">Enter your 1-Rep Max to generate your working weights.</p>
+        </header>
+        <div class="io-calc-form">
+            <div class="io-input-group">
+                <label class="io-label" for="ioLiftName">Lift / Movement</label>
+                <div class="io-input-row">
+                    <select class="io-select" id="ioLiftName">
+                        <option>Back Squat</option><option>Front Squat</option><option>Overhead Squat</option>
+                        <option>Deadlift</option><option>Romanian Deadlift</option><option>Clean</option>
+                        <option>Clean &amp; Jerk</option><option>Snatch</option><option>Strict Press</option>
+                        <option>Push Press</option><option>Push Jerk</option><option>Bench Press</option>
+                        <option>Thruster</option><option>Custom...</option>
+                    </select>
+                </div>
+                <input class="io-input io-input--custom-lift" id="ioLiftCustom" type="text" placeholder="Enter lift name..." style="display:none">
+            </div>
+            <div class="io-input-group">
+                <label class="io-label" for="io1RM">1-Rep Max</label>
+                <div class="io-input-row">
+                    <input class="io-input io-input--1rm" id="io1RM" type="number" inputmode="decimal" min="1" max="9999" placeholder="e.g. 255">
+                    <div class="io-unit-toggle" role="group">
+                        <button class="io-unit-btn io-unit-btn--active" data-unit="lb">lb</button>
+                        <button class="io-unit-btn" data-unit="kg">kg</button>
+                    </div>
+                </div>
+                <span class="io-hint">Round to nearest 5 or 2.5</span>
+            </div>
+            <div class="io-input-group">
+                <label class="io-label">Rounding</label>
+                <div class="io-round-toggle" role="group">
+                    <button class="io-round-btn io-round-btn--active" data-round="5">5</button>
+                    <button class="io-round-btn" data-round="2.5">2.5</button>
+                    <button class="io-round-btn" data-round="1">1</button>
+                    <button class="io-round-btn" data-round="0">None</button>
+                </div>
+            </div>  
+        </div>
+        <div class="io-result-wrap" id="ioResultWrap" aria-live="polite">
+            <div class="io-result-header">
+                <span class="io-result-title" id="ioResultTitle"></span>
+                <button class="io-copy-btn" id="ioCopyBtn" title="Copy table">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2v4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    <span>Copy</span>
+                </button>
+            </div>
+            <table class="io-pct-table" id="ioPctTable">
+                <thead>
+                    <tr>
+                        <th>%</th>
+                        <th id="ioTableWeightHeader">Weight</th>
+                        <th>Target Zone</th>
+                    </tr>
+                </thead>
+                <tbody id="ioPctTableBody"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Vault Panel -->
+    <section class="io-panel io-panel--vault" id="tab-panel-vault" role="tabpanel" aria-labelledby="tab-btn-vault">
+        <header class="io-section-header">
+            <h2 class="io-section-title"><span class="io-icon-badge">LOCK</span>Benchmark Vault</h2>
+            <p class="io-section-sub">Standard workouts &amp; goal scores.</p>
+        </header>
+        <div class="io-search-bar">
+            <div class="io-search-wrap">
+                <svg class="io-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <input class="io-input io-input--search" id="ioSearch" type="search" placeholder="Search benchmarks...">
+            </div>
+            <select class="io-select io-select--filter" id="ioCategoryFilter">
+                <option value="">All Categories</option>
+                <option value="conditioning">Conditioning</option>
+                <option value="strength">Strength</option>
+                <option value="gymnastics">Gymnastics</option>
+                <option value="mixed">Mixed Modal</option>
+            </select>
+        </div>
+        <div class="io-benchmark-count" id="ioBenchmarkCount">7 Benchmarks</div>
+
+        <ul class="io-benchmark-list" id="ioBenchmarkList" role="list">
+            <!-- 1 -->
+            <li class="io-benchmark-card" data-title="century test" data-category="conditioning" data-search="century test 100 deadlifts barbell conditioning">
+                <button class="io-card-trigger" aria-expanded="false" aria-controls="bm-body-1">
+                    <span class="io-card-title">Century Test</span>
+                    <span class="io-card-meta">
+                        <span class="io-badge io-badge--conditioning">Conditioning</span>
+                        <span class="io-goal-pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Sub 8:00</span>
+                    </span>
+                    <span class="io-chevron"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+                </button>
+                <div class="io-card-body" id="bm-body-1" hidden>
+                    <div class="io-card-body" id="bm-body-1" hidden>
+                        <div class="io-desc"><h4 class="io-sub-heading">Movement Description</h4><p>For time:\n100 Deadlifts(135/95 lb)\n\nPartition reps however needed. Bar may not be dropped from lockout - must under control. Scale load to maintain consistent mechanics throughout.</p></div>
+                        <div class="io-equip">
+                            <h4 class="io-sub-heading">Equipment</h4>
+                            <ul class="io-equip-list"><li>Barbell</li><li>Plates</li></ul>
+                        </div>
+                        <div class="io-goal-block"><span class="io-goal-label">Goal Score</span><span class="io-goal-value">Sub 8:00</span></div>
+                    </div>
+                </div>
+            </li>
+
+            <!-- 2 -->
+            <li class="io-benchmark-card" data-title="the iron mile" data-category="mixed" data-search="iron mile run deadlift box jump mixed modal">
+                <button class="io-card-trigger" aria-expanded="false" aria-controls="bm-body-2">
+                    <span class="io-card-title">The Iron Mile</span>
+                    <span class="io-card-meta">
+                        <span class="io-badge io-badge--mixed">Mixed Modal</span>
+                        <span class="io-goal-pill">Sub 18:00</span>
+                    </span>
+                    <span class="io-chevron"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+                </button>
+                <div class="io-card-body" id="bm-body-2" hidden>
+                    <div class="io-desc"><h4 class="io-sub-heading">Movement Description</h4><p>4 Rounds for time:\n400m Run\n10 Deadlifts (255/155 lb)\n15 Box Jumps (24/20 in)\n\nRx+ adds a 20 lb vest. Rest as needed between rounds but clock keeps running.</p></div>
+                    <div class="io-equip">
+                        <h4 class="io-sub-heading">Equipment</h4>
+                        <ul class="io-equip-list"><li>Barbell</li><li>Plates</li><li>24" Box</li></ul>
+                    </div>
+                    <div class="io-goal-block"><span class="io-goal-label">Goal Score</span><span class="io-goal-value">Sub 18:00</span></div>
+                </div>
+            </li>
+
+            <!-- 3 -->
+            <li class="io-benchmark-card" data-title="squat focus" data-category="strength" data-search="squat focus back squat strength 5x5">
+                <button class="io-card-trigger" aria-expanded="false" aria-controls="bm-body-3">
+                    <span class="io-card-title">Squat Focus</span>
+                    <span class="io-card-meta">
+                        <span class="io-badge io-badge--strength">Strength</span>
+                        <span class="io-goal-pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>5x5 @80%+</span>
+                    </span>
+                    <span class="io-chevron"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+                </button>
+                <div class="io-card-body" id="bm-body-3" hidden>
+                    <div class="io-desc"><h4 class="io-sub-heading">Movement Description</h4><p>Back Squat: \n5x5 @ 80% of 1RM\n\nRest 3 minutes between sets. Focus on bar path, depth, and bracing. Log total volume (sets x reps x load). Goal is consistent improvement week over week.</p></div>
+                    <div class="io-equip">
+                        <h4 class="io-sub-heading">Equipment</h4>
+                        <ul class="io-equip-list"><li>Brbell</li><li>Squat Rack</li><li>Plates</li></ul>
+                    </div>
+                    <div class="io-goal-block"><span class="io-goal-label">Goal Score</span><span class="io-goal-value">5x5 @ 80%+</span></div>
+                </div>
+            </li>
+
+            <!-- 4 -->
+            <li class="io-benchmark-card" data-title="pull-up pyramid" data-category="gymnastics" data-search="pull-up pyramid gymnastics strict pull-ups">
+                <button class="io-card-trigger" aria-expanded="false" aria-controls="bm-body-4">
+                    <span class="io-card-title">Pull-Up Pyramid</span>
+                    <span class="io-card-meta">
+                        <span class="io-badge io-badge--gymnastics">Gymnastics</span>
+                        <span class="io-goal-pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Complete unbroken</span>
+                    </span>
+                    <span class="io-chevron"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+                </button>
+                <div class="io-card-body" id="bm-body-4" hidden>
+                    <div class="io-desc"><h4 class="io-sub-heading">Movement Description</h4><p>Strict Pull-Up Pyramid:\n1-2-3-4-5-4-3-2-1 reps\n\nEach set must be unbroken. Rest 90 seconds between sets. Add a 10 lb vest for Rx+. Record max constructive reps if unable to complete a full unbroken set.</p></div>
+                    <div class="io-equip">
+                        <h4 class="io-sub-heading">Equipment</h4>
+                        <ul class="io-equip-list"><li>Pull-up Bar</li></ul>
+                    </div>
+                    <div class="io-goal-block"><span class="io-goal-label">Goal Score</span><span class="io-goal-value">Complete unbroken</span></div>
+                </div>
+            </li>
+
+            <!-- 5 -->
+            <li class="io-benchmark-card" data-title="oxygen burn" data-category="conditioning" data-search="oxygen burn row assault bike calories conditioning">
+                <button class="io-card-trigger" aria-expanded="false" aria-controls="bm-body-5">
+                    <span class="io-card-title">Oxygen Burn</span>
+                    <span class="io-card-meta">
+                        <span class="io-badge io-badge--conditioning">Conditioning</span>
+                        <span class="io-goal-pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>150+ cals</span>
+                    </span>
+                    <span 467></span>
+                </button>
+            </li>
+        </ul>
+    </section>
+
+</div>
     
 </body>
 </html>
